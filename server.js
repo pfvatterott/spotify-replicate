@@ -1,32 +1,26 @@
 const express = require("express");
-const cors = require("cors");
+const path = require("path");
+const PORT = process.env.PORT || 3001;
 const app = express();
-const Replicate = require("replicate")
-const dotenv = require('dotenv');
-dotenv.config();
+const routes = require("./routes")
+const dotenv = require('dotenv').config();
+const querystring = require('querystring')
 
-app.use(cors());
+// Define middleware here
+app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
-
-app.get("/message", (req, res) => {
-  res.json({ message: "Hello from server!" });
-});
-
-app.listen(8000, () => {
-  console.log(`Server is running on port 8000.`);
-});
-
-
-const runReplicate = async () => {
-    const replicate = new Replicate({
-        auth: process.env.REPLICATE_API_TOKEN,
-      });
-      
-      const model = "stability-ai/stable-diffusion:db21e45d3f7023abc2a46ee38a23973f6dce16bb082a930b0c49861f96d1e5bf";
-      const input = { prompt: "an astronaut riding a horse on mars, hd, dramatic lighting, detailed" };
-      const output = await replicate.run(model, { input });
-      
-      console.log(output);
+// Serve up static assets (usually on heroku)
+if (process.env.NODE_ENV === "production") {
+  app.use(express.static("client/build"));
 }
 
-runReplicate()
+app.use(routes);
+
+app.get("/", (req, res) => {
+  res.sendFile(path.join(__dirname, "./client/build/index.html"));
+});
+
+app.listen(PORT, () => {
+  console.log(`🌎 ==> API server now on port ${PORT}!`);
+});
+
