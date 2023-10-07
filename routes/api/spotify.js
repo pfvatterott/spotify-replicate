@@ -24,9 +24,46 @@ const getBearerToken = async (req, res) => {
     }
 }
 
-// Matches with "/api/books"
+const getProfileData = async (req, res) => {
+    try {
+        const userData = await axios.get('https://api.spotify.com/v1/me',
+            {
+                headers: {
+                    'content-type': 'application/json',
+                    'Authorization': `Bearer ${req.body.bearerToken}`
+                }
+            }
+        )
+        res.json(userData.data)
+    } catch (err) {
+        console.log(err)
+    }
+}
+
+const getTopArtists = async (req, res) => {
+    try {
+        const userData = await axios.get('https://api.spotify.com/v1/me/top/artists',
+            {
+                headers: {
+                    'content-type': 'application/json',
+                    'Authorization': `Bearer ${req.body.bearerToken}`
+                }
+            }
+        )
+        res.json(userData.data)
+    } catch (err) {
+        console.log(err)
+    }
+}
+
 router.route("/login")
     .post(getBearerToken)
+
+router.route("/getProfileData")
+    .post(getProfileData)
+
+router.route("/getTopArtists")
+    .post(getTopArtists)
 
 
 module.exports = router;
