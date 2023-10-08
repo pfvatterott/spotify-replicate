@@ -5,17 +5,16 @@ import axios from "axios"
 function Callback() {
     const [redirectToProfile, setRedirectToProfile] = useState(false);
     const [searchParams, setSearchParams] = useSearchParams();
-    const [userAuth, setUserAuth] = useState({})
+    const [userDetails, setUserDetails] = useState({})
     const tempCode = searchParams.get("code")
     const navigate = useNavigate();
     useEffect(() => {
-        axios.post('/api/spotify/login', {
+        axios.post('/api/spotify/getProfileData', {
             code: tempCode
         })
             .then(function (response) {
-                setUserAuth({
-                    'bearerToken': response.data.access_token,
-                    'refreshToken': response.data.refresh_token
+                setUserDetails({
+                    'userDetails': response.data
                 })
                 setRedirectToProfile(true)
             })
@@ -26,7 +25,7 @@ function Callback() {
     
     return (
         <div className="flex items-center justify-center">
-            {redirectToProfile ? navigate("/profile", {state:userAuth}) : null}
+            {redirectToProfile ? navigate("/profile", {state:userDetails}) : null}
         </div>
     );
 }
