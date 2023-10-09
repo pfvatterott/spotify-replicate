@@ -64,13 +64,21 @@ function Profile() {
             setLoadingVisible("flex flex-row justify-center")
             let userTopArtists = await getUserTopArtists(location.state.userDetails.refreshToken)
             let aiResponse = await getAiResponse(userTopArtists)
+            aiResponse = aiResponse.join("")
+
+            let startIndex = aiResponse.indexOf('[');
+            let endIndex = aiResponse.lastIndexOf(']') + 1;
+
+            let arrayStr = aiResponse.slice(startIndex, endIndex);
+
+            let aiResponseArray = JSON.parse(arrayStr);
             let songArray = []
-            for (let i = 0; i < aiResponse.length; i++) {
-                let song = await getSong(aiResponse[i].title, aiResponse[i].artist, location.state.userDetails.refreshToken)
+            for (let i = 0; i < aiResponseArray.length; i++) {
+                let song = await getSong(aiResponseArray[i].title, aiResponseArray[i].artist, location.state.userDetails.refreshToken)
                 if (song.tracks.items[0]) {
                     let songObj = {
-                        "title": aiResponse[i].title,
-                        "artist": aiResponse[i].artist,
+                        "title": aiResponseArray[i].title,
+                        "artist": aiResponseArray[i].artist,
                         "id": song.tracks.items[0].id,
                         "link": song.tracks.items[0].external_urls.spotify,
                         "uri": song.tracks.items[0].uri
@@ -103,7 +111,7 @@ function Profile() {
         });
         setPlaylistUrl(response.data.external_urls.spotify)
         return response.data
-        
+
     };
 
     return (
@@ -136,7 +144,7 @@ function Profile() {
                 </form>
             </div>
             <div>
-               {playlistUrl ? <h2>Playlist URL: {playlistUrl}</h2> : null}
+                {playlistUrl ? <h2>Playlist URL: {playlistUrl}</h2> : null}
             </div>
             <div>
                 {mappedItems}
