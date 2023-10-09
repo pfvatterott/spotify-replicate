@@ -113,14 +113,74 @@ const getSong = async (req, res) => {
                 }
             }
         )
-        console.log(songData.data)
         let songDataRes = songData.data
         songDataRes.refreshToken = userAuth.refresh_token
         res.json(songDataRes)
     } catch (err) {
         console.log(err)
     }
-}   
+}
+
+const createPlaylist = async (playlistName, userId, auth) => {
+    try {
+        const playlistData = await axios.post(`https://api.spotify.com/v1/users/${userId}/playlists`,
+            {
+                "name": playlistName,
+                "public": false
+            },
+            {
+                headers: {
+                    'content-type': 'application/json',
+                    'Authorization': `Bearer ${auth}`
+                }
+            })
+        return playlistData.data
+    } catch (err) {
+        console.log(err)
+    }
+}
+
+const addSongsToPlaylist = async (playlistId, songUriArray, auth) => {
+    try {
+        const playlistData = await axios.post(`https://api.spotify.com/v1/playlists/${playlistId}/tracks`,
+            {
+                "uris": songUriArray
+            },
+            {
+                headers: {
+                    'content-type': 'application/json',
+                    'Authorization': `Bearer ${auth}`
+                }
+            })
+        return playlistData.data
+    } catch (err) {
+        console.log(err)
+    }
+}
+
+const savePlaylist = async (req, res) => {
+    let userAuth;
+    if (req.body.code) {
+        userAuth = await getBearerToken(req.body.code)
+    }
+    else {
+        userAuth = await getRefreshToken(req.body.refreshToken)
+    }
+    try {
+        let playlistDetails = await createPlaylist(req.body.playlistName, req.body.userId, userAuth.access_token)
+        let songArray = req.body.songs
+        let songUriArray = []
+        for (let i = 0; i < songArray.length; i++) {
+            songUriArray.push(songArray[i].uri)
+        }
+        await addSongsToPlaylist(playlistDetails.id, songUriArray, userAuth.access_token)
+
+        playlistDetails.refreshToken = userAuth.refresh_token
+        res.json(playlistDetails)
+    } catch (err) {
+        console.log(err)
+    }
+}
 
 router.route("/getProfileData")
     .post(getProfileData)
@@ -128,8 +188,10 @@ router.route("/getProfileData")
 router.route("/getTopArtists")
     .post(getTopArtists)
 
-    router.route("/getSong")
+router.route("/getSong")
     .post(getSong)
 
+router.route("/savePlaylist")
+    .post(savePlaylist)
 
 module.exports = router;
