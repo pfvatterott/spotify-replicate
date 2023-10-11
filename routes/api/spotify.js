@@ -96,6 +96,44 @@ const getTopArtists = async (req, res) => {
     }
 }
 
+const getTopGenres = async (req, res) => {
+    let userAuth;
+    if (req.body.code) {
+        userAuth = await getBearerToken(req.body.code)
+    }
+    else {
+        userAuth = await getRefreshToken(req.body.refreshToken)
+    }
+    try {
+        const userData = await axios.get('https://api.spotify.com/v1/me/top/artists',
+            {
+                headers: {
+                    'content-type': 'application/json',
+                    'Authorization': `Bearer ${userAuth.access_token}`
+                }
+            }
+        )
+        let userDataRes = userData.data
+        let genres = []
+        let artists = userData.data.items 
+        for (let i = 0; i < artists.length; i++) {
+            artists[i].genres.forEach(genre => {
+                if (!genres.includes(genre)) {
+                    genres.push(genre)
+                }
+            });
+            
+        }
+        let returnObj = {
+            genres: genres,
+            refreshToken: userAuth.refresh_token
+        }
+        res.json(returnObj)
+    } catch (err) {
+        console.log(err)
+    }
+}
+
 const getSong = async (req, res) => {
     let userAuth;
     if (req.body.code) {
@@ -187,6 +225,9 @@ router.route("/getProfileData")
 
 router.route("/getTopArtists")
     .post(getTopArtists)
+
+    router.route("/getTopGenres")
+    .post(getTopGenres)
 
 router.route("/getSong")
     .post(getSong)

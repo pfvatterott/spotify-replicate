@@ -14,6 +14,7 @@ function Profile() {
     const [submitPlaylistVisible, setSubmitPlaylistVisible] = useState("invisible")
     const [playlistUrl, setPlaylistUrl] = useState("")
     useEffect(() => {
+
         if (!location.state || !location.state.userDetails) {
             const fetchData = async () => {
                 let userDetails = await getUserDetails(location.state.userDetails.refreshToken)
@@ -35,16 +36,24 @@ function Profile() {
         return response.data
     };
 
-    const getUserTopArtists = async (refreshToken) => {
-        const response = await axios.post('/api/spotify/getTopArtists', {
+    // const getUserTopArtists = async (refreshToken) => {
+    //     const response = await axios.post('/api/spotify/getTopArtists', {
+    //         refreshToken: refreshToken
+    //     });
+    //     return response.data.items
+    // };
+
+    const getUserTopGenres = async (refreshToken) => {
+        const response = await axios.post('/api/spotify/getTopGenres', {
             refreshToken: refreshToken
         });
-        return response.data.items
+        console.log(response.data.genres)
+        return response.data
     };
 
-    const getAiResponse = async (favoriteArtistArray) => {
+    const getAiResponse = async (favoriteGenreArray) => {
         const response = await axios.post("/api/replicate/query", {
-            favoriteArtists: favoriteArtistArray,
+            favoriteGenres: favoriteGenreArray,
             prompt: input
         });
         return response.data
@@ -63,8 +72,9 @@ function Profile() {
         if (e.key === "Enter") {
             setQueryBoxVisible("invisible")
             setLoadingVisible("flex flex-row justify-center")
-            let userTopArtists = await getUserTopArtists(location.state.userDetails.refreshToken)
-            let aiResponse = await getAiResponse(userTopArtists)
+            // let userTopArtists = await getUserTopArtists(location.state.userDetails.refreshToken)
+            let userTopGenres = await getUserTopGenres(location.state.userDetails.refreshToken)
+            let aiResponse = await getAiResponse(userTopGenres)
             aiResponse = aiResponse.join("")
 
             let startIndex = aiResponse.indexOf('[');
@@ -115,7 +125,7 @@ function Profile() {
 
     };
 
-    return (
+    return (    
         <div>
             <Navbar></Navbar>
         <div className="container mx-auto">
