@@ -1,7 +1,14 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
+import { useLocation, useNavigate } from 'react-router-dom';
+import Navbar from "../components/Navbar";
 const querystring = require('querystring');
 
+
 function Welcome() {
+    const location = useLocation();
+    const navigate = useNavigate();
+    const [redirectToProfile, setRedirectToProfile] = useState(false);
+    const [userDetails, setUserDetails] = useState({})
     const scope = 'user-read-private user-read-email user-top-read playlist-modify-public playlist-modify-private';
     const authUrl = 'https://accounts.spotify.com/authorize?' +
     querystring.stringify({
@@ -11,9 +18,20 @@ function Welcome() {
       redirect_uri: "http://localhost:3000/callback"
     })
 
+    useEffect(() => {
+        if (location.state && location.state.userDetails) {
+            setUserDetails(location.state.userDetails)
+            setRedirectToProfile(true)
+        }
+    }, [])
+
     return (
+        <div>
+            <Navbar></Navbar>
         <div className="flex items-center justify-center">
             <a href={authUrl} class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 mr-2 mb-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800 my-10">Log In</a>
+        </div>
+            {redirectToProfile ? navigate("/profile", {state:userDetails}) : null}
         </div>
     );
 }

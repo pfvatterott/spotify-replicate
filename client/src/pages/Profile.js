@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useLocation } from 'react-router-dom';
+import Navbar from "../components/Navbar";
 import axios from "axios"
 
 function Profile() {
@@ -115,6 +116,8 @@ function Profile() {
     };
 
     return (
+        <div>
+            <Navbar></Navbar>
         <div className="container mx-auto">
             <div className="flex flex-row justify-center">
                 <img className="basis-1" src={profileData ? profileData.images[0].url : null} alt="description"></img>
@@ -149,6 +152,7 @@ function Profile() {
             <div>
                 {mappedItems}
             </div>
+        </div>
         </div>
     );
 }
